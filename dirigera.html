@@ -14,9 +14,9 @@
         return this.name;
       }
       let defaultName = "dirigeraHub"
-      if (!this.hubAccessCode) {
-        defaultName += " (missing hubAccess Code)"
-      }
+      // if (!this.hubAccessCode) {
+      //   defaultName += " (missing hubAccess Code)"
+      // }
       return defaultName;
     },
     oneditprepare: function () {
@@ -30,20 +30,27 @@
       $('#node-input-lookup-hubAccessCode-tip').hide()
       $('#node-input-lookup-hubAccessCode-button').click(function () {
         $('#node-input-lookup-hubAccessCode-tip').text('Press button on hub now within 60 sec !!!')
+        $('#node-input-tip-image').attr("src", "https://raw.githubusercontent.com/zinen/node-red-contrib-dirigera/9554afe12caf6b42eff6c15243f86541dd22e0ee/image/push-button.jpg");
         $('#node-input-lookup-hubAccessCode-tip').show()
         $('#node-config-input-hubAccessCode').val('')
         $.get('ikeaDirigera/auth', { hubAddress: $('#node-config-input-hubAddress').val(), clientName: node.name }, function (resp) {
-          console.log(resp)
+          // console.log(resp)
           let response = JSON.parse(resp);
           if (response.error || !response.access_token) {
             $('#node-input-lookup-hubAccessCode-tip').text('Error: ' + response.error)
+            $('#node-input-tip-image').attr("src", "");
             return
           }
           $('#node-input-lookup-hubAccessCode-tip').text('Access code received OK. Ready to save this config')
+          $('#node-input-tip-image').attr("src", "");
           $('#node-config-input-hubAccessCode').val(response.access_token)
         })
       });
-    }
+    },
+    oneditsave: function() {
+            this.hubAddress = $('#node-config-input-hubAddress').val();
+            this.hubAccessCode = $('#node-config-input-hubAccessCode').val();
+        }
   });
 </script>
 
@@ -65,9 +72,10 @@
       <input type="text" id="node-config-input-hubAccessCode" placeholder="asda213qas" style="flex-grow: 1;" autocomplete="off">
       <a id="node-input-lookup-hubAccessCode-button" class="editor-button" style="margin-left: 10px;"><i class="fa fa-refresh"></i></a>
     </div>
-    <div class="form-row"></div>
+  </div>
+  <div class="form-row">
     <div class="form-tips" id="node-input-lookup-hubAccessCode-tip">.</div>
-    <img src="push-button.jpg" alt="">
+    <img id="node-input-tip-image" src="" alt="">
   </div>
   </div>
 </script>
@@ -160,4 +168,17 @@
 </script>
 
 <script type="text/html" data-help-name="dirigera">
+  <h3>Help</h3>
+  If every dropdown is empty and you just finished your config with the address and access code. Try deploy and reopen this menu.
+
+  <h3>Input</h3>
+  <ul>
+    <code>msg.cmd</code>  as input will send that command to the hub. If let empty will return status of devices in selected room.
+  </ul>
+  <h3>Output</h3>
+  <ul>
+    <code>msg.payload</code> return output data from the hub.
+    <code>msg.cmd</code> available commands to send to the devices.
+  </ul>
+
 </script>

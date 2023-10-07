@@ -1,8 +1,6 @@
 module.exports = function (RED) {
   'use strict'
   const { Authenticate, Dirigera } = require('dirigera-simple')
-  const Path = require('path')
-  const fs = require('node:fs/promises')
   function parseToList (devicesRaw) {
     const connectedDevices = {}
     for (const device of devicesRaw) {
@@ -51,7 +49,7 @@ module.exports = function (RED) {
   //   })
   // })
   RED.httpAdmin.get('/ikeaDirigera/auth', RED.auth.needsPermission('dirigera.read'), function (req, res) {
-    console.log('/ikeaDirigera/auth > req.query', JSON.stringify(req.query))
+    // console.log('/ikeaDirigera/auth > req.query', JSON.stringify(req.query))
     const onError = (errorText) => {
       if (done) return
       res.json(JSON.stringify({ error: errorText }))
@@ -66,25 +64,19 @@ module.exports = function (RED) {
     res.setTimeout(60000, function () {
       onError('Button push was not registered at adress: ' + hubAddress)
     })
-    console.log('running auth against ip ' + hubAddress)
-    try {
-      /* eslint-disable no-new */
-      new Authenticate(hubAddress, data => {
-        console.log('x2', data)
-        if (!data.error) {
-          try {
-            res.json(JSON.stringify(data))
-            done = true
-          } catch (error) {
-            onError('/ikeaDirigera/auth > Authenticate callback:err> ' + String(error))
-          }
-        }
-      })
-    } catch (error) {
-      console.log('sda')
-      console.error(error)
-      onError('/ikeaDirigera/auth > Authenticate new:err> ' + String(error))
-    }
+    // console.log('running auth against ip ' + hubAddress)
+    const hubOptions = {}
+    hubOptions.ip = hubAddress
+    hubOptions.clientName = req.query.clientName ? req.query.clientName : 'node-red-dirigera'
+    /* eslint-disable no-new */
+    new Authenticate(hubOptions, data => {
+      if (data.error) {
+        onError('/ikeaDirigera/auth > Authenticate callback:err> ' + String(data.message))
+        return
+      }
+      res.json(JSON.stringify(data))
+      done = true
+    })
   })
   RED.httpAdmin.get('/ikeaDirigera/dirigera', RED.auth.needsPermission('dirigera.read'), function (req, res) {
     const node = RED.nodes.getNode(req.query.nodeId)
@@ -98,35 +90,24 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n)
     const node = this
     if (!node.credentials.hubAddress) return
-    try {
-      node.dirigeraClient = new Dirigera(
-        node.credentials.hubAddress,
-        node.credentials.hubAccessCode
-      )
-      node.dirigeraClient.getDeviceList(devices => {
-        if (devices.error) {
-          node.devices = null
-          node.warn('Dirigera hub error: ' + String(devices.message))
+    node.dirigeraClient = new Dirigera(
+      node.credentials.hubAddress,
+      node.credentials.hubAccessCode
+      , data => {
+        if (data.error) {
+          node.error('Dirigera config error: ' + data.message || data)
           return
         }
-        // console.log('getDeviceList > ' + JSON.stringify(devices))
-        node.devices = parseToList(devices)
+        node.dirigeraClient.setDebug(true)
+        node.dirigeraClient.getDeviceList(devices => {
+          if (devices.error) {
+            node.devices = null
+            node.warn('Dirigera hub error: ' + String(devices.message))
+            return
+          }
+          node.devices = parseToList(devices)
+        })
       })
-      node.dirigeraClient.setDebug(true)
-    } catch (error) {
-      node.error('Dirigera config error: ' + error.message || error)
-    }
-    this.on('close', async function (removed, done) {
-      // This node is being restarted or disabled/deleted
-      try {
-        if (removed) {
-          // This node has been disabled/deleted
-          if (node.nibeuplinkClient) node.nibeuplinkClient.clearSession()
-          fs.unlink(Path.join(__dirname, '.session' + node.id + '.json')).catch()
-        }
-      } catch (_) { }
-      done()
-    })
   }
   RED.nodes.registerType('dirigera-config', DirigeraConfigNode, {
     credentials: {
@@ -164,11 +145,8 @@ module.exports = function (RED) {
           msg.payload = node.server.devices[node.config.choiceType][node.config.choiceRoom].list
           msg.cmd = node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive
         }
-        // node.server.dirigeraClient.getDeviceList(async devices => {
-        //   msg.payload = parseToList(devices)
         send(msg)
         done()
-        // })
       } catch (error) {
         node.status({ fill: 'red', text: error.message || error })
         done(error.message || error)
