@@ -1,0 +1,46 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: npm test and publish
+
+on:
+  # Run on push to the main branch
+  push:
+    branches: [ main ]
+  # Run only test part for PRs.
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm test --if-present
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    # Only publish on push
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        id: publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - if: steps.publish.outputs.type != 'none'
+        name: Update Node-Red flow-library
+        uses: BigThunderSR/update-package-node-red-flow-library-action@v1.1.2
+        continue-on-error: true
+        with:
+          package-name: 'node-red-contrib-dirigera'
+      
