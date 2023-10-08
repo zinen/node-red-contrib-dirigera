@@ -48,7 +48,7 @@ module.exports = function (RED) {
   //     }
   //   })
   // })
-  RED.httpAdmin.get('/ikeaDirigera/auth', RED.auth.needsPermission('dirigera.read'), function (req, res) {
+  RED.httpAdmin.get('/ikeaDirigera/auth', RED.auth.needsPermission('dirigera.write'), function (req, res) {
     // console.log('/ikeaDirigera/auth > req.query', JSON.stringify(req.query))
     const onError = (errorText) => {
       if (done) return
