@@ -20,7 +20,8 @@ module.exports = function (RED) {
         id: device.id,
         name: device.attributes.customName,
         createdAt: device.createdAt,
-        isReachable: device.isReachable
+        isReachable: device.isReachable,
+        lastSeen: device.lastSeen
       })
       if (Object.prototype.hasOwnProperty.call(device.attributes, 'batteryPercentage')) {
         connectedDevices[device.type][device.room.name].list[newIndex - 1].batteryPercentage = device.attributes.batteryPercentage
@@ -146,6 +147,7 @@ module.exports = function (RED) {
           msg.payload = node.server.devices[node.config.choiceType][node.config.choiceRoom].list
           msg.cmd = node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive
         }
+        msg.topic = node.config.choiceType
         send(msg)
         done()
       } catch (error) {
