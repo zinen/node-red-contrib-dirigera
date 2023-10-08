@@ -81,7 +81,8 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/ikeaDirigera/dirigera', RED.auth.needsPermission('dirigera.read'), function (req, res) {
     const node = RED.nodes.getNode(req.query.nodeId)
     if (node.dirigeraClient && node.dirigeraClient.state.loaded) {
-      res.json(JSON.stringify(node.devices))
+      node.devices = parseToList(node.dirigeraClient.devices)
+      res.json(JSON.stringify(parseToList(node.devices)))
     } else {
       res.sendStatus(404)
     }
