@@ -122,12 +122,12 @@
       $.get('ikeaDirigera/dirigera', { nodeId: configNodeId }, function (resp) {
         let response = JSON.parse(resp)
         $('#node-input-choiceType').find('option').remove();
-        let devices = Object.keys(response)
-        if (!Array.isArray(devices) || devices.length <= 0) { return; }
-        $.each(devices, function (i, device) {
+        let deviceTypes = Object.keys(response)
+        if (!Array.isArray(deviceTypes) || deviceTypes.length <= 0) { return; }
+        $.each(deviceTypes, function (i, deviceTypes) {
           let opt = {};
-          opt.value = device;
-          opt.text = device;
+          opt.value = deviceTypes;
+          opt.text = deviceTypes;
           if (node.choiceType === opt.value) {
             opt.selected = "selected";
           }

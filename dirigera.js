@@ -148,7 +148,7 @@ module.exports = function (RED) {
               throw new Error(`${node.config.choiceType} does accept cmd: ${msg.cmd}, try: ${node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive.join(', ')}.`)
             }
             msg.payload = { [msg.cmd]: msg.payload }
-            node.server.dirigeraClient.setRoomAttribute(node.server.devices[node.config.choiceType][node.config.choiceRoom].id, msg.payload)
+            node.server.dirigeraClient.setRoomAttribute(node.server.devices[node.config.choiceType][node.config.choiceRoom].id, msg.payload, null, node.config.choiceType)
             msg.id = node.server.devices[node.config.choiceType][node.config.choiceRoom].id
           } else {
             msg.payload = node.server.devices[node.config.choiceType][node.config.choiceRoom].list
