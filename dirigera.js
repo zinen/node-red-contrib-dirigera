@@ -2,6 +2,7 @@ module.exports = function (RED) {
   'use strict'
   const { Authenticate, Dirigera } = require('dirigera-simple')
   function parseToList (devicesRaw) {
+    if (!devicesRaw) return null
     const connectedDevices = {}
     for (const device of devicesRaw) {
       if (device.type === 'gateway') continue
@@ -63,7 +64,7 @@ module.exports = function (RED) {
       return
     }
     res.setTimeout(60000, function () {
-      onError('Button push was not registered at adress: ' + hubAddress)
+      onError('Button push was not registered at address: ' + hubAddress)
     })
     // console.log('running auth against ip ' + hubAddress)
     const hubOptions = {}
@@ -83,7 +84,7 @@ module.exports = function (RED) {
     const node = RED.nodes.getNode(req.query.nodeId)
     if (node.dirigeraClient && node.dirigeraClient.state.loaded) {
       node.devices = parseToList(node.dirigeraClient.devices)
-      res.json(JSON.stringify(parseToList(node.devices)))
+      res.json(JSON.stringify(node.devices))
     } else {
       res.sendStatus(404)
     }
