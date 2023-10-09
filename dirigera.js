@@ -27,8 +27,12 @@ module.exports = function (RED) {
       if (Object.prototype.hasOwnProperty.call(device.attributes, 'batteryPercentage')) {
         connectedDevices[device.type][device.room.name].list[newIndex - 1].batteryPercentage = device.attributes.batteryPercentage
       }
-      if (Object.prototype.hasOwnProperty.call(device.attributes, 'blindsTargetLevel')) {
-        connectedDevices[device.type][device.room.name].list[newIndex - 1].blindsTargetLevel = device.attributes.blindsTargetLevel
+      if (device.capabilities.canReceive) {
+        device.capabilities.canReceive.forEach(element => {
+          if (Object.prototype.hasOwnProperty.call(device.attributes, element)) {
+            connectedDevices[device.type][device.room.name].list[newIndex - 1][element] = device.attributes[element]
+          }
+        })
       }
     }
     return connectedDevices
