@@ -129,7 +129,7 @@ module.exports = function (RED) {
         if (!node.server || !node.server.dirigeraClient) {
           throw new Error('Unknown config error')
         }
-        node.dirigeraClient.getDeviceList(devices => {
+        node.server.dirigeraClient.getDeviceList(devices => {
           if (devices.error) {
             node.devices = null
             throw new Error('Dirigera hub error: ' + String(devices.message))
