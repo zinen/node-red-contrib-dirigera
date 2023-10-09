@@ -129,27 +129,36 @@ module.exports = function (RED) {
         if (!node.server || !node.server.dirigeraClient) {
           throw new Error('Unknown config error')
         }
-        if (!(node.config.choiceType in node.server.devices)) {
-          throw new Error(`Object does not have key: ${node.config.choiceType}`)
+        if (node.dirigeraClient && node.dirigeraClient.state.loaded) {
+          node.dirigeraClient.getDeviceList(devices => {
+            if (devices.error) {
+              node.devices = null
+              throw new Error('Dirigera hub error: ' + String(devices.message))
+            }
+            node.devices = parseToList(devices)
+            if (!(node.config.choiceType in node.server.devices)) {
+              throw new Error(`Object does not have key: ${node.config.choiceType}`)
+            }
+            if (!(node.config.choiceRoom in node.server.devices[node.config.choiceType])) {
+              throw new Error(`Object does not have key: ${node.config.choiceRoom}`)
+            }
+            if (msg.cmd) {
+              msg.cmd = String(msg.cmd)
+              if (!node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive.includes(msg.cmd)) {
+                throw new Error(`${node.config.choiceType} does accept cmd: ${msg.cmd}, try: ${node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive.join(', ')}.`)
+              }
+              msg.payload = { [msg.cmd]: msg.payload }
+              node.server.dirigeraClient.setRoomAttribute(node.server.devices[node.config.choiceType][node.config.choiceRoom].id, msg.payload)
+              msg.id = node.server.devices[node.config.choiceType][node.config.choiceRoom].id
+            } else {
+              msg.payload = node.server.devices[node.config.choiceType][node.config.choiceRoom].list
+              msg.cmd = node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive
+            }
+            msg.topic = node.config.choiceType
+            send(msg)
+            done()
+          })
         }
-        if (!(node.config.choiceRoom in node.server.devices[node.config.choiceType])) {
-          throw new Error(`Object does not have key: ${node.config.choiceRoom}`)
-        }
-        if (msg.cmd) {
-          msg.cmd = String(msg.cmd)
-          if (!node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive.includes(msg.cmd)) {
-            throw new Error(`${node.config.choiceType} does accept cmd: ${msg.cmd}, try: ${node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive.join(', ')}.`)
-          }
-          msg.payload = { [msg.cmd]: msg.payload }
-          node.server.dirigeraClient.setRoomAttribute(node.server.devices[node.config.choiceType][node.config.choiceRoom].id, msg.payload)
-          msg.id = node.server.devices[node.config.choiceType][node.config.choiceRoom].id
-        } else {
-          msg.payload = node.server.devices[node.config.choiceType][node.config.choiceRoom].list
-          msg.cmd = node.server.devices[node.config.choiceType][node.config.choiceRoom].canReceive
-        }
-        msg.topic = node.config.choiceType
-        send(msg)
-        done()
       } catch (error) {
         node.status({ fill: 'red', text: error.message || error })
         done(error.message || error)
