@@ -101,7 +101,7 @@
     });
   }
   RED.nodes.registerType('dirigera', {
-    category: 'request',
+    category: 'homesmart',
     color: '#fbd914',
     defaults: {
       name: { value: "" },
@@ -111,7 +111,7 @@
     },
     inputs: 1,
     outputs: 1,
-    icon: "white-globe.svg",
+    icon: 'font-awesome/fa-home',
     label: function () {
       return this.name || "Digigra:" + this.choiceRoom;
     },
