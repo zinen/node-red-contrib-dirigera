@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-dirigera",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "A Node-Red Node for controlling Ikea Dirigera hub.",
   "keywords": [
     "node-red",
@@ -17,9 +17,6 @@
     "name": "zinen"
   },
   "license": "MIT",
-  "dependencies": {
-    "dirigera-simple": "git+https://zinen@bitbucket.org/zinen2/dirigera-simple.git"
-  },
   "devDependencies": {
     "standard": "*"
   },
@@ -38,5 +35,12 @@
   "files": [
     "dirigera.html",
     "examples/"
-  ]
+  ],
+  "dependencies": {
+    "node-dirigera-promise": "^0.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zinen/node-red-contrib-dirigera"
+  }
 }
