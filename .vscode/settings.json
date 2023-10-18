@@ -3,7 +3,8 @@
     "Dirigera",
     "homesmart",
     "oneditprepare",
-    "oneditsave"
+    "oneditsave",
+    "Tradfri"
   ],
   "standard.autoFixOnSave": true
 }
