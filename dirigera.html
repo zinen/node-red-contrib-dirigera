@@ -39,7 +39,7 @@
 <script type="text/html" data-template-name="dirigera-config">
   <div class="form-row">
       <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input type="text" id="node-config-input-name" placeholder="Optional name. If filled before requesting access code it can be found in Dirigera's own app">
+      <input type="text" id="node-config-input-name" placeholder="Optional name. See help text.">
   </div>
   <div class="form-row">
       <label for="node-config-input-hubAddress"><i class="fa fa-globe"></i> Hub address ip/hostname</label>
@@ -60,6 +60,11 @@
     <img id="node-input-tip-image" src="" alt="">
   </div>
   </div>
+</script>
+
+<script type="text/html" data-help-name="dirigera-config">
+  <p>If name is filled when requesting access token this name can be found in the Dirigera app. Else it defaults to <code>node-red-dirigera</code></p>
+  <p>You can later redefine this name but that wont update the name inside the Dirigera app.</p>
 </script>
 
 <script type="text/javascript">
@@ -149,7 +154,7 @@
     },
     oneditsave: function () {
       this.choiceTitle = $('#node-input-choiceId').find(":selected").text()
-      if (this.choiceType == 'scene') this.outputs = 0
+      this.outputs = this.choiceType == 'scene' ? 0 : 1
     }
   })
 </script>
@@ -176,17 +181,20 @@
 </script>
 
 <script type="text/html" data-help-name="dirigera">
-  <h3>Help</h3>
-  If every dropdown is empty and you just finished your config with the address and access code. Try deploy and reopen this menu.
-
+  <p>Get status and apply changes to the Dirigera hub</p>
+  <p><i>If dropdowns are empty deploy config and look again.</i></p>
   <h3>Input</h3>
-  <ul>
-    <code>msg.cmd</code>  as input will send that command to the hub. If let empty will return status of devices in selected room.
-  </ul>
+  <dl class="message-properties">
+    <dt>payload<span class="property-type">any | number | string</span></dt>
+    <dd>Gets status on any input. If <code>msg.topic</code> is defined this sets the payload sent to Dirigera.</dd>
+    <dt class="optional">topic <span class="property-type">string</span></dt>
+    <dd>If defined will change this attribute on devices in the rooms chosen. Scene trigger does not support this.</dd>
+  </dl>
   <h3>Output</h3>
-  <ul>
-    <code>msg.payload</code> return output data from the hub.
-    <code>msg.cmd</code> available commands to send to the devices.
-  </ul>
-
+  <dl class="message-properties">
+    <dt>payload<span class="property-type">object | array</span></dt>
+    <dd>Return output data from the hub.</dd>
+    <dt class="optional">availableTopics <span class="property-type">array</span></dt>
+    <dd>On status request tells which topics are supported</dd>
+  </dl>
 </script>

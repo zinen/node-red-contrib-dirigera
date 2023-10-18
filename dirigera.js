@@ -93,16 +93,16 @@ module.exports = function (RED) {
           throw new Error('Unknown config error')
         }
         if (node.config.choiceType === 'scene') {
-          msg.payload = await node.server.dirigeraClient.triggerScene(node.config.choiceId)
+          await node.server.dirigeraClient.triggerScene(node.config.choiceId)
         } else {
-          if (msg.cmd) {
-            msg.payload = await node.server.dirigeraClient.setRoom(node.config.choiceId, msg.cmd, msg.payload, node.config.choiceType)
+          if (msg.topic) {
+            msg.payload = await node.server.dirigeraClient.setRoom(node.config.choiceId, msg.topic, msg.payload, node.config.choiceType)
           } else {
             msg.payload = await node.server.dirigeraClient.getRoom(node.config.choiceId, node.config.choiceType)
+            msg.availableTopics = msg.payload[0].capabilities.canReceive
           }
+          send(msg)
         }
-        msg.topic = node.config.choiceType
-        send(msg)
         done()
       } catch (error) {
         node.status({ fill: 'red', text: error.message || error })
