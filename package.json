@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-dirigera",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A Node-Red Node for controlling Ikea Dirigera hub.",
   "keywords": [
     "node-red",
@@ -9,7 +9,7 @@
   ],
   "main": "dirigera.js",
   "scripts": {
-    "start-test": "node logs/index.js",
+    "start-dev": "node logs/index.js",
     "test": "standard",
     "lint": "standard --fix"
   },
@@ -37,7 +37,7 @@
     "examples/"
   ],
   "dependencies": {
-    "node-dirigera-promise": "^0.4.2"
+    "node-dirigera-promise": "^0.5.3"
   },
   "repository": {
     "type": "git",

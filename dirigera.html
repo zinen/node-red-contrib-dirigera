@@ -17,21 +17,21 @@
       $('#node-input-lookup-hubAccessCode-tip').hide()
       $('#node-input-lookup-hubAccessCode-button').click(function () {
         $('#node-input-lookup-hubAccessCode-tip').text('Press button on hub now within 60 sec !!!')
-        $('#node-input-tip-image').attr("src", "https://raw.githubusercontent.com/zinen/node-red-contrib-dirigera/9554afe12caf6b42eff6c15243f86541dd22e0ee/image/push-button.jpg");
+        $('#node-input-tip-image').attr("src", "https://raw.githubusercontent.com/zinen/node-red-contrib-dirigera/9554afe12caf6b42eff6c15243f86541dd22e0ee/image/push-button.jpg")
         $('#node-input-lookup-hubAccessCode-tip').show()
         $('#node-config-input-hubAccessCode').val('')
         $.get('ikeaDirigera/auth', { hubAddress: $('#node-config-input-hubAddress').val(), clientName: $('#node-config-input-name').val() }, function (resp) {
-          let response = JSON.parse(resp);
+          let response = JSON.parse(resp)
           if (response.error || !response.access_token) {
             $('#node-input-lookup-hubAccessCode-tip').text('Error: ' + response.error)
-            $('#node-input-tip-image').attr("src", "");
+            $('#node-input-tip-image').attr("src", "")
             return
           }
           $('#node-input-lookup-hubAccessCode-tip').text('Access code received OK. Ready to save this config')
-          $('#node-input-tip-image').attr("src", "");
+          $('#node-input-tip-image').attr("src", "")
           $('#node-config-input-hubAccessCode').val(response.access_token)
         })
-      });
+      })
     }
   })
 </script>
@@ -64,42 +64,46 @@
 
 <script type="text/javascript">
   const updateType = (node) => {
-    let configNodeId = $('#node-input-server').find(":selected").val();
-    if (configNodeId == null || configNodeId === '_ADD_') { return; }
+    let configNodeId = $('#node-input-server').find(":selected").val()
+    if (configNodeId == null || configNodeId === '_ADD_') return
     $.get('ikeaDirigera/dirigera', { nodeId: configNodeId }, function (resp) {
       if (!resp) return
       let response = JSON.parse(resp)
-      $('#node-input-choiceType').find('option').remove();
+      if (response.error) {
+        node.error(response.error)
+        return
+      }
+      $('#node-input-choiceType').find('option').remove()
       let deviceTypes = Object.keys(response)
       if (!Array.isArray(deviceTypes) || deviceTypes.length <= 0) return
       $.each(deviceTypes, function (i, deviceTypes) {
-        let opt = {};
-        opt.value = deviceTypes;
-        opt.text = deviceTypes;
-        if (node.choiceType === opt.value) {
-          opt.selected = "selected";
+        let opt = {}
+        // opt.value = deviceTypes
+        opt.text = deviceTypes
+        if (node.choiceType === opt.text) {
+          opt.selected = "selected"
         }
-        $('#node-input-choiceType').append($('<option>', opt));
-      });
+        $('#node-input-choiceType').append($('<option>', opt))
+      })
       $('#node-input-choiceType').change(function () {
-        updateRooms(response, node.choiceRoomID)
-      });
-      updateRooms(response, node.choiceRoomID)
+        updateRooms(response, node.choiceId)
+      })
+      updateRooms(response, node.choiceId)
     })
   }
-  const updateRooms = (response, choiceRoomID) => {
-    $('#node-input-choiceRoomID').find('option').remove();
+  const updateRooms = (response, choiceId) => {
+    $('#node-input-choiceId').find('option').remove()
     let rooms = response[$('#node-input-choiceType').val()]
-    if (!Array.isArray(rooms) || rooms.length <= 0) { return; }
+    if (!Array.isArray(rooms) || rooms.length <= 0) return
     $.each(rooms, function (i, room) {
-      let opt = {};
-      opt.value = room.id;
-      opt.text = room.name;
-      if (choiceRoomID === opt.value) {
-        opt.selected = "selected";
+      let opt = {}
+      opt.value = room.id
+      opt.text = room.name
+      if (choiceId === opt.value) {
+        opt.selected = "selected"
       }
-      $('#node-input-choiceRoomID').append($('<option>', opt));
-    });
+      $('#node-input-choiceId').append($('<option>', opt))
+    })
   }
   RED.nodes.registerType('dirigera', {
     category: 'homesmart',
@@ -108,29 +112,46 @@
       name: { value: "" },
       server: { type: "dirigera-config", required: true },
       choiceType: { value: "" },
-      choiceRoom: { value: "" },
-      choiceRoomID: { value: "" }
+      choiceTitle: { value: "" },
+      choiceId: { value: "" },
+      choiceIcon: { value: "" },
+      outputs: { value: 1 }
     },
     inputs: 1,
     outputs: 1,
-    icon: 'font-awesome/fa-home',
+    icon: function () {
+      switch (this.choiceType) {
+        case "blinds":
+          return 'font-awesome/fa-window-maximize'
+        case "light":
+          return "font-awesome/fa-lightbulb-o"
+        case "controller":
+          return 'font-awesome/fa-power-off'
+        case "scene":
+          return 'font-awesome/fa fa-sitemap'
+        default:
+          break
+      }
+      return 'font-awesome/fa-home'
+    },
     label: function () {
-      return this.name || this.choiceType+": " + this.choiceRoom;
+      return this.name || this.choiceTitle || "Dirigera Hub"
     },
     oneditprepare: function () {
       const node = this
       updateType(node)
 
       $('#node-input-server').change(function () {
-        $('#node-input-choiceType').find('option').remove();
-        $('#node-input-choiceRoomID').find('option').remove();
+        $('#node-input-choiceType').find('option').remove()
+        $('#node-input-choiceId').find('option').remove()
         updateType(node)
-      });
+      })
     },
     oneditsave: function () {
-      this.choiceRoom = $('#node-input-choiceRoomID').find(":selected").text()
+      this.choiceTitle = $('#node-input-choiceId').find(":selected").text()
+      if (this.choiceType == 'scene') this.outputs = 0
     }
-  });
+  })
 </script>
 
 <script type="text/html" data-template-name="dirigera">
@@ -143,13 +164,13 @@
       <input type="text" id="node-input-server">
   </div>
   <div class="form-row">
-      <label for="node-input-choiceType"><i class="fa fa-window-maximize"></i> Choose type</label>
+      <label for="node-input-choiceType"><i class="fa fa-home"></i> Type</label>
       <select value="" id="node-input-choiceType">
       </select>
   </div>
   <div class="form-row">
-    <label for="node-input-choiceRoomID"><i class="fa fa-home"></i> Choose room</label>
-    <select value="" id="node-input-choiceRoomID">
+    <label for="node-input-choiceId">Choose from list</label>
+    <select value="" id="node-input-choiceId">
     </select>
 </div>
 </script>
