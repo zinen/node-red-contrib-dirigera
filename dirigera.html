@@ -17,7 +17,7 @@
       $('#node-input-lookup-hubAccessCode-tip').hide()
       $('#node-input-lookup-hubAccessCode-button').click(function () {
         $('#node-input-lookup-hubAccessCode-tip').text('Press button on hub now within 60 sec !!!')
-        $('#node-input-tip-image').attr("src", "https://raw.githubusercontent.com/zinen/node-red-contrib-dirigera/9554afe12caf6b42eff6c15243f86541dd22e0ee/image/push-button.jpg")
+        $('#node-input-tip-image').attr("src", "https://raw.githubusercontent.com/zinen/node-red-contrib-dirigera/main/image/push-button.jpg")
         $('#node-input-lookup-hubAccessCode-tip').show()
         $('#node-config-input-hubAccessCode').val('')
         $.get('ikeaDirigera/auth', { hubAddress: $('#node-config-input-hubAddress').val(), clientName: $('#node-config-input-name').val() }, function (resp) {
@@ -154,7 +154,7 @@
     },
     oneditsave: function () {
       this.choiceTitle = $('#node-input-choiceId').find(":selected").text()
-      this.outputs = this.choiceType == 'scene' ? 0 : 1
+      this.outputs = $('#node-input-choiceType').find(":selected").text() == 'scene' ? 0 : 1
     }
   })
 </script>
@@ -185,10 +185,10 @@
   <p><i>If dropdowns are empty deploy config and look again.</i></p>
   <h3>Input</h3>
   <dl class="message-properties">
-    <dt>payload<span class="property-type">any | number | string</span></dt>
+    <dt>payload<span class="property-type">bool | number | string</span></dt>
     <dd>Gets status on any input. If <code>msg.topic</code> is defined this sets the payload sent to Dirigera.</dd>
     <dt class="optional">topic <span class="property-type">string</span></dt>
-    <dd>If defined will change this attribute on devices in the rooms chosen. Scene trigger does not support this.</dd>
+    <dd>If defined will change this attribute on devices in the chosen room. Scene trigger does not support this.</dd>
   </dl>
   <h3>Output</h3>
   <dl class="message-properties">
