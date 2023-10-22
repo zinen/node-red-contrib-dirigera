@@ -63,16 +63,15 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n)
     const node = this
     if (!node.credentials.hubAddress || !node.credentials.hubAccessCode) return
-    try {
-      node.dirigeraClient = new DirigeraHub({ hubAddress: node.credentials.hubAddress, access_token: node.credentials.hubAccessCode, debug: 0 })
-      node.dirigeraClient.logIn().catch((error) => {
-        node.dirigeraClient = undefined
-        node.error('Dirigera config error: ' + error)
-      })
-    } catch (error) {
+    const temp = new DirigeraHub({ hubAddress: node.credentials.hubAddress, access_token: node.credentials.hubAccessCode, debug: 0 })
+    temp.logIn().then(() => {
+      node.dirigeraClient = temp
+      node.lastError = ''
+    }).catch((error) => {
       node.dirigeraClient = undefined
       node.error('Dirigera config error: ' + error)
-    }
+      node.lastError = String(error) || ''
+    })
   }
   RED.nodes.registerType('dirigera-config', DirigeraConfigNode, {
     credentials: {
@@ -90,7 +89,11 @@ module.exports = function (RED) {
       node.status({ fill: '', text: '' })
       try {
         if (!node.server || !node.server.dirigeraClient) {
-          throw new Error('Unknown config error')
+          const lastError = node.server && node.server.lastError ? ': ' + node.server.lastError : ''
+          throw new Error('Unknown config error' + lastError)
+        }
+        if (node.config.choiceId === -1) {
+          throw new Error('Choices error in dropdowns or config error')
         }
         if (node.config.choiceType === 'scene') {
           await node.server.dirigeraClient.triggerScene(node.config.choiceId)
