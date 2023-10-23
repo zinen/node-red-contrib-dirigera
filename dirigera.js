@@ -53,7 +53,7 @@ module.exports = function (RED) {
         }
         res.json(JSON.stringify(result))
       } catch (error) {
-        res.json('{"Error see console":[{"name":"'+String(error)+'", "id":-1}]}')
+        res.json('{"Error see console":[{"name":"' + String(error) + '", "id":-1}]}')
         node.error('Dirigera get devices error: ' + error)
       }
     } else {
