@@ -133,17 +133,24 @@
         case "controller":
           return 'font-awesome/fa-power-off'
         case "scene":
-          return 'font-awesome/fa fa-sitemap'
+          return 'font-awesome/fa-sitemap'
+        case "speaker":
+          return 'font-awesome/fa-volume-up'
+        case "outlet":
+          return 'font-awesome/fa-plug'
         default:
           break
       }
       return 'font-awesome/fa-home'
     },
     label: function () {
+      if (choiceId == "-1") this.name || "Dirigera Hub"
       return this.name || this.choiceTitle || "Dirigera Hub"
     },
     oneditprepare: function () {
       const node = this
+      $('#node-input-choiceType').append($('<option>', { text: 'Waiting for data' }))
+      $('#node-input-choiceId').append($('<option>', { text: 'Waiting for data' }))
       updateType(node)
 
       $('#node-input-server').change(function () {

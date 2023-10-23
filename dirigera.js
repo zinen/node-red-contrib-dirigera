@@ -34,14 +34,24 @@ module.exports = function (RED) {
       try {
         const result = {}
         for (const device of (await node.dirigeraClient.getDevice())) {
-          if (device.type === 'gateway') continue
-          if (!Object.prototype.hasOwnProperty.call(result, device.type)) {
-            result[device.type] = [{ name: device.room.name, id: device.room.id }]
-          } else if (Object.prototype.hasOwnProperty.call(result, device.type)) {
-            const hasObjectWithId = result[device.type].some((item) => item.id === device.room.id)
-            if (!hasObjectWithId) {
-              result[device.type].push({ name: device.room.name, id: device.room.id })
+          try {
+            if (device.type === 'gateway') continue
+            const roomName = device.room && device.room.name ? device.room.name : '(no room defined)'
+            const roomID = device.room && device.room.id ? device.room.id : ''
+            if (!Object.prototype.hasOwnProperty.call(result, device.type)) {
+              result[device.type] = [{ name: roomName, id: roomID }]
+            } else if (Object.prototype.hasOwnProperty.call(result, device.type)) {
+              const hasObjectWithId = result[device.type].some((item) => item.id === roomID)
+              if (!hasObjectWithId) {
+                result[device.type].push({ name: roomName, id: roomID })
+              }
             }
+          } catch (error) {
+            console.log('/ikeaDirigera/dirigera-API-Error--Start:')
+            console.log(error)
+            console.log('/ikeaDirigera/dirigera-API-Error--item:')
+            console.log(device)
+            console.log('/ikeaDirigera/dirigera-API-Error--end.')
           }
         }
         for (const scene of (await node.dirigeraClient.getScene())) {
@@ -101,6 +111,7 @@ module.exports = function (RED) {
         } else {
           if (msg.topic) {
             msg.payload = await node.server.dirigeraClient.setRoom(node.config.choiceId, msg.topic, msg.payload, node.config.choiceType)
+            if (msg.payload.ok.length === 0 && msg.payload.errors.length > 0) throw new Error(msg.payload.errors[0])
           } else {
             msg.payload = await node.server.dirigeraClient.getRoom(node.config.choiceId, node.config.choiceType)
             msg.availableTopics = msg.payload[0].capabilities.canReceive
