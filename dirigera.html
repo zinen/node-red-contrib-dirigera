@@ -75,7 +75,7 @@
       if (!resp) return
       let response = JSON.parse(resp)
       if (response.error) {
-        node.error(response.error)
+        console.error('Node-red Dirigera node error: ' + response.error)
         return
       }
       $('#node-input-choiceType').find('option').remove()
