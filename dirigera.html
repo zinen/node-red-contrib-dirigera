@@ -144,7 +144,7 @@
       return 'font-awesome/fa-home'
     },
     label: function () {
-      if (choiceId == "-1") this.name || "Dirigera Hub"
+      if (!this.choiceId) return this.name || "Dirigera Hub"
       return this.name || this.choiceTitle || "Dirigera Hub"
     },
     oneditprepare: function () {
