@@ -32,7 +32,7 @@ module.exports = function (RED) {
     const node = RED.nodes.getNode(req.query.nodeId) || {}
     if (node.dirigeraClient) {
       try {
-        const result = {}
+        const result = { devices: [] }
         for (const device of (await node.dirigeraClient.getDevice())) {
           try {
             if (device.type === 'gateway') continue
@@ -46,6 +46,7 @@ module.exports = function (RED) {
                 result[device.type].push({ name: roomName, id: roomID })
               }
             }
+            result.devices.push({ name: `${device.type || ''} - ${device.room.name || ''} - ${device.attributes.customName || ''}`, id: device.id })
           } catch (error) {
             console.log('/ikeaDirigera/dirigera-API-Error--Start:')
             console.log(error)
@@ -54,6 +55,8 @@ module.exports = function (RED) {
             console.log('/ikeaDirigera/dirigera-API-Error--end.')
           }
         }
+        // Sort devices list by its name
+        result.devices = result.devices.sort((a, b) => { return a.name < b.name ? -1 : 1 })
         for (const scene of (await node.dirigeraClient.getScene())) {
           if (!Object.prototype.hasOwnProperty.call(result, 'scene')) {
             result.scene = [{ name: scene.info.name, id: scene.id }]
@@ -108,6 +111,14 @@ module.exports = function (RED) {
         }
         if (node.config.choiceType === 'scene') {
           await node.server.dirigeraClient.triggerScene(node.config.choiceId)
+        } else if (node.config.choiceType === 'Specific device') {
+          if (msg.topic) {
+            msg.payload = await node.server.dirigeraClient.setDevice(node.config.choiceId, msg.topic, msg.payload)
+          } else {
+            msg.payload = await node.server.dirigeraClient.getDevice(node.config.choiceId)
+            msg.availableTopics = msg.payload.capabilities.canReceive
+          }
+          send(msg)
         } else {
           if (msg.topic) {
             msg.payload = await node.server.dirigeraClient.setRoom(node.config.choiceId, msg.topic, msg.payload, node.config.choiceType)
