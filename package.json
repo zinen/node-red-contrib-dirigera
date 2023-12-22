@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-dirigera",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A Node-Red Node for controlling Ikea Dirigera hub.",
   "keywords": [
     "node-red",
@@ -10,7 +10,8 @@
   "main": "dirigera.js",
   "scripts": {
     "start-dev": "node logs/index.js",
-    "test": "standard",
+    "xpretest": "npm install node-red-node-test-helper node-red mocha --no-save",
+    "test": "standard && mocha \"test/**/*.spec.js\"",
     "lint": "standard --fix"
   },
   "author": {

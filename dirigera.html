@@ -99,10 +99,7 @@
   const updateChoiceList = (response, choiceId) => {
     $('#node-input-choiceId').find('option').remove()
     let listItems = response[$('#node-input-choiceType').val()]
-    if (!Array.isArray(listItems) || listItems.length <= 0) {
-      $('#node-input-choiceId').html('')
-      return
-    }
+    if (!Array.isArray(listItems) || listItems.length <= 0) return
     $.each(listItems, function (i, room) {
       let opt = {}
       opt.value = room.id

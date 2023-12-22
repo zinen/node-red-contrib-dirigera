@@ -35,8 +35,9 @@ module.exports = function (RED) {
         const result = { specificDevice: [] }
         for (const device of (await node.dirigeraClient.getDevice())) {
           try {
-            if (device.type === 'gateway') continue
             const roomName = device.room && device.room.name ? device.room.name : '(no room defined)'
+            result.specificDevice.push({ name: `${device.type || ''} - ${roomName} - ${device.attributes.customName || ''}`, id: device.id })
+            if (device.type === 'gateway') continue
             const roomID = device.room && device.room.id ? device.room.id : ''
             if (!Object.prototype.hasOwnProperty.call(result, device.type)) {
               result[device.type] = [{ name: roomName, id: roomID }]
@@ -46,7 +47,6 @@ module.exports = function (RED) {
                 result[device.type].push({ name: roomName, id: roomID })
               }
             }
-            result.specificDevice.push({ name: `${device.type || ''} - ${device.room.name || ''} - ${device.attributes.customName || ''}`, id: device.id })
           } catch (error) {
             console.log('/ikeaDirigera/dirigera-API-Error--Start:')
             console.log(error)
