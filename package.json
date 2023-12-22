@@ -10,7 +10,7 @@
   "main": "dirigera.js",
   "scripts": {
     "start-dev": "node logs/index.js",
-    "xpretest": "npm install node-red-node-test-helper node-red mocha --no-save",
+    "pretest": "npm install node-red-node-test-helper node-red mocha --no-save",
     "test": "standard && mocha \"test/**/*.spec.js\"",
     "lint": "standard --fix"
   },
