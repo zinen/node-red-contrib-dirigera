@@ -90,10 +90,6 @@
         }
         $('#node-input-choiceType').append($('<option>', opt))
       })
-      // Add choice to modify one device directly
-      let opt = {text: 'Specific device'}
-      if (node.choiceType === opt.text) opt.selected = "selected"
-      $('#node-input-choiceType').append($('<option>', opt))
       $('#node-input-choiceType').change(function () {
         updateChoiceList(response, node.choiceId)
       })
@@ -102,14 +98,11 @@
   }
   const updateChoiceList = (response, choiceId) => {
     $('#node-input-choiceId').find('option').remove()
-    let listItems
-    if ($('#node-input-choiceType').val() == 'Specific device') {
-      listItems = response.devices
-    } else {
-      listItems = response[$('#node-input-choiceType').val()]
+    let listItems = response[$('#node-input-choiceType').val()]
+    if (!Array.isArray(listItems) || listItems.length <= 0) {
+      $('#node-input-choiceId').html('')
+      return
     }
-    if (listItems.length == -1) 
-    if (!Array.isArray(listItems) || listItems.length <= 0) return
     $.each(listItems, function (i, room) {
       let opt = {}
       opt.value = room.id
