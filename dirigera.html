@@ -144,7 +144,9 @@
       return 'font-awesome/fa-home'
     },
     label: function () {
-      if (this.choiceId === "-1") return this.name || "Dirigera Hub"
+      if (this.name) return this.name
+      if (this.choiceId === "-1") return "Dirigera Hub"
+      if (this.choiceId && String(this.choiceId).includes('override')) return this.choiceType + ' with id override'
       return this.name || this.choiceTitle || "Dirigera Hub"
     },
     oneditprepare: function () {
@@ -196,6 +198,8 @@
     <dd>Gets status on any input. If <code>msg.topic</code> is defined this sets the payload sent to Dirigera.</dd>
     <dt class="optional">topic <span class="property-type">string</span></dt>
     <dd>If defined will change this attribute on devices in the chosen room. Scene trigger does not support this.</dd>
+    <dt>deviceId/roomId<span class="property-type">string</span></dt>
+    <dd>Override must be chosen from dropdown for this to work. Input string of ID as seen in status output.</dd>
   </dl>
   <h3>Output</h3>
   <dl class="message-properties">
